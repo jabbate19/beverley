@@ -3,7 +3,6 @@ mod oidc;
 
 use actix_web::*;
 use std::{str, env};
-use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use std::collections::HashMap;
 use stripe::{Session, Event, check_signature};
 use serde::{Deserialize, Serialize};
@@ -142,12 +141,6 @@ async fn cancel() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
-    builder
-        .set_private_key_file("key.pem", SslFiletype::PEM)
-        .unwrap();
-    builder.set_certificate_chain_file("cert.pem").unwrap();
-
     HttpServer::new(|| {
         App::new()
             .service(index)
@@ -157,7 +150,7 @@ async fn main() -> std::io::Result<()> {
             .service(cancel)
     })
     .bind(("0.0.0.0", 8080))?
-    .bind_openssl("0.0.0.0:8081", builder)?
     .run()
     .await
 }
+
